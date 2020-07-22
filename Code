@@ -1,0 +1,420 @@
+
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include <string>
+#include <math.h>
+#include <fstream>
+#include <map>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	typedef vector<int> Vector;
+	typedef map <int, Vector> MAP;
+	std::cout << "Select the desired action:" << endl;
+	std::cout << "	- Open files     (press 1)" << endl;
+	std::cout << "	- Create a file  (press 2)" << endl;
+	int press;
+	cin >> press;
+	if (press == 1)
+	{
+		//Читаем и выводим первую матрицу
+		cout << "First matrix" << endl;
+		ifstream file1("Matrix1.txt");
+		MAP Matrix1;
+
+
+		string s1;
+		string s = "/";
+		int n1;
+		int i1;
+		Vector vec1;
+		int count1 = 0;
+		if (file1.is_open())
+		{
+			while (file1 >> s)
+			{
+				//int count = 0;
+				getline(file1, s1);
+				istringstream iss(s1);
+				vec1.clear();
+
+				for (i1 = 0; i1 < s1.size(); i1++)
+				{
+					if (s1[i1] == ' ')
+					{
+						count1++;
+					}
+					while (iss >> n1)
+					{
+						vec1.push_back(n1);
+
+					}
+				}
+				Matrix1.insert(make_pair(count1/9, vec1));
+				i1 = 0;
+
+			}
+		}
+		else { std::cout << "PROBLEMS" << endl; }
+
+		for (MAP::const_iterator it = Matrix1.begin(); it != Matrix1.end(); ++it)
+		{
+			std::cout << (*it).first << " ";
+			for (int j = 0; j < vec1.size(); j++)
+			{
+				Vector::iterator iter = vec1.begin();
+				advance(iter, j);
+				vec1 = it->second;
+				std::cout << "|" << vec1[j] << "|" << " ";
+			}
+			std::cout << endl;
+
+		}
+	//Читаем и выводим вторую матрицу
+		cout << "Second matrix" << endl;
+		ifstream file2("Matrix2.txt");
+		MAP Matrix2;
+		string s2;
+		int n2;
+		int i2;
+		Vector vec2;
+		int count2 = 0;
+		if (file2.is_open())
+		{
+			while (file2 >> s)
+			{
+				getline(file2, s2);
+				istringstream iss2(s2);
+				vec2.clear();
+				for (i2 = 0; i2 < s2.size(); i2++)
+				{
+					if (s2[i2] == ' ')
+					{
+						count2++;
+					}
+					while (iss2 >> n2)
+					{
+						vec2.push_back(n2);
+					}
+				}
+				Matrix2.insert(make_pair((count2 / 9)+1 , vec2));
+				i2 = 0;
+			}
+		}
+		else { std::cout << "PROBLEMS" << endl; }
+
+		for (MAP::const_iterator it2 = Matrix2.begin(); it2 != Matrix2.end(); ++it2)
+		{
+			std::cout << (*it2).first << " ";
+			for (int j2 = 0; j2 < vec2.size(); j2++)
+			{
+				Vector::iterator iter2 = vec2.begin();
+				advance(iter2, j2);
+				vec2 = it2->second;
+				std::cout << "|" << vec2[j2] << "|" << " ";
+			}
+			std::cout << endl;
+
+		}
+        //Работаем с файлом с суммой
+		cout << "Select the desired action:" << endl;
+		cout << "-Write the source matrices to a file        (Press 1)" << endl;
+		cout << "-Write only the sum of matrices to a file   (Press 2 " << endl;
+		int presss;
+		cin >> presss;
+		// Создаем файл с матрицами			
+		ofstream  summa;
+		summa.open("summa.txt");
+		//Выводим иходные матрицы в файл
+		if (presss == 1)
+		{
+
+			//Первая матрица
+			for (MAP::const_iterator it = Matrix1.begin(); it != Matrix1.end(); ++it)
+			{
+				summa << (*it).first << " ";
+				for (int j = 0; j < vec1.size(); j++)
+				{
+					Vector::iterator iter = vec1.begin();
+					advance(iter, j);
+					vec1 = it->second;
+					summa << "|" << vec1[j] << "|" << " ";
+				}
+				summa << endl;
+
+			}
+			summa << endl;
+			//Вторая матрица 
+			for (MAP::const_iterator it2 = Matrix2.begin(); it2 != Matrix2.end(); ++it2)
+			{
+				summa << (*it2).first << " ";
+				for (int j2 = 0; j2 < vec2.size(); j2++)
+				{
+					Vector::iterator iter2 = vec2.begin();
+					advance(iter2, j2);
+					vec2 = it2->second;
+					summa << "|" << vec2[j2] << "|" << " ";
+				}
+				summa << endl;
+			}
+
+		}
+		summa << endl;
+
+		//Сумма матриц 
+		MAP MATRIXSUMM;
+		Vector vec3;
+
+
+		for (MAP::iterator it = Matrix1.begin(); it != Matrix1.end(); ++it)
+		{
+			vec3.clear();
+			int b = it->first;
+			
+			Vector vec1 = it->second;
+			Vector::iterator iter1 = vec1.begin();
+            MAP ::iterator  result = Matrix2.find(b);
+			Vector vec2 = result->second;
+			Vector::iterator iter2 = vec2.begin();
+			std::transform(
+				vec1.begin(), vec1.end(),
+				vec2.begin(), std::back_inserter(vec3),
+				std::plus<int>());
+			MATRIXSUMM.insert(make_pair(b, vec3));
+		}
+
+			for (MAP::const_iterator it3 = MATRIXSUMM.begin(); it3 != MATRIXSUMM.end(); ++it3)
+			{
+				summa << (*it3).first << " ";
+				for (int j2 = 0; j2 < vec3.size(); j2++)
+				{
+					Vector::iterator iter3 = vec3.begin();
+					advance(iter3, j2);
+					vec3 = it3->second;
+					summa << "|";
+					if (vec3[j2] < 10) { summa << " "; }
+					summa << vec3[j2] << "|" << " ";
+				}
+				summa << endl;
+
+			}
+			summa.close();
+	}
+if (press == 2)
+{
+	cout <<" When entering matrices, pay attention to the following:" << endl;
+	cout << endl;
+	cout << "    The sum of two matrices is a matrix, each  element  of  which  is  equal" << endl;
+	cout << "    to the sum of the corresponding elements of  the stacked  matrices.  You"<< endl;
+	cout << "    can only add matrices with the same size. in other words, the number  of"<< endl;
+	cout << "    rows and columns in the first Matrix must be equal to the number of rows"<< endl;
+	cout << "    and columns in the second matrix." << endl;
+	cout << endl;
+	cout << "               How to enter the matrix" << endl; 
+	cout << "    To do this:" << endl;
+	cout << "    -start    entering    the   matrix    with    the    symbol    ' / '" << endl;                                             
+	cout << "    -enter      line      elements      separated     by     a     space"<< endl;
+	cout << "    -mark    the    end   of   the   line   with   the   button  'enter'"<< endl;
+	cout<<  "    -mark the end of the matrix with the keyboard shortcut 'Ctr+Z+enter'" << endl;
+	cout << "Enter the first matrix" << endl;
+
+
+// Ввод первой матрицы 
+		MAP Matrix1;
+		string s1;
+		string s = "/";
+		int n1;
+		int i1;
+		Vector vec1;
+		int count1 = 0;
+	while (cin >> s)
+	{
+		getline(cin, s1, '\n');
+		istringstream iss(s1);
+		vec1.clear();
+		for (i1 = 0; i1 < s1.size(); i1++)
+		{
+			if (s1[i1] == ' ')
+			{
+				count1++;
+			}
+			while (iss >> n1)
+			{
+				vec1.push_back(n1);
+			}
+		Matrix1.insert(make_pair(count1 / 9, vec1));
+		}
+	}
+	std::cin.clear();
+
+// Cоздание файла с первой матрицей 
+	ofstream  Matrix_1;
+	Matrix_1.open("Matrix_1.txt");
+	for (MAP::const_iterator it = Matrix1.begin(); it != Matrix1.end(); ++it)
+	{
+		Matrix_1 << (*it).first << " ";
+		for (int j = 0; j < vec1.size(); j++)
+		{
+			Vector::iterator iter = vec1.begin();
+			advance(iter, j);
+			vec1 = it->second;
+			Matrix_1 << "|" << vec1[j] << "|" << " ";
+		}
+		Matrix_1 << endl;
+	}
+	Matrix_1.close();
+
+
+//Аналогично со второй матрицей
+
+// Ввод второй матрицы 
+	cout << "Enter the second matrix" << endl;
+
+	MAP Matrix2;
+	string s2;
+	//string s = "/";
+	int n2;
+	int i2;
+	Vector vec2;
+	int count2 = 0;
+	while (cin >> s)
+	{
+		getline(cin, s2, '\n');
+		istringstream iss2(s2);
+		vec2.clear();
+		for (i2 = 0; i2 < s2.size(); i2++)
+		{
+			if (s2[i2] == ' ')
+			{
+				count2++;
+			}
+			while (iss2 >> n2)
+			{
+				vec2.push_back(n2);
+			}
+			Matrix2.insert(make_pair(count2 / 9, vec2));
+		}
+	}
+
+// Cоздание файла со второй матрицей 
+	ofstream  Matrix_2;
+	Matrix_2.open("Matrix_2.txt");
+	for (MAP::const_iterator it = Matrix2.begin(); it != Matrix2.end(); ++it)
+	{
+		Matrix_2 << (*it).first << " ";
+		for (int j = 0; j < vec2.size(); j++)
+		{
+			Vector::iterator iter = vec2.begin();
+			advance(iter, j);
+			vec2 = it->second;
+			Matrix_2 << "|" << vec2[j] << "|" << " ";
+		}
+		Matrix_2 << endl;
+	}
+	Matrix_2.close();
+
+	std::cin.clear();
+
+//Файл с суммой матриц 
+//Работаем с файлом с суммой
+	cout << "Select the desired action:" << endl;
+	cout << "-Write the source matrices to a file        (Press 1)" << endl;
+	cout << "-Write only the sum of matrices to a file   (Press 2 " << endl;
+	int presss;
+	cin >> presss;
+// Создаем файл с матрицами			
+	ofstream   summa;
+	summa.open("Summa.txt");
+//Выводим иходные матрицы в файл
+	if (presss == 1)
+	{
+
+		//Первая матрица
+		for (MAP::const_iterator it = Matrix1.begin(); it != Matrix1.end(); ++it)
+		{
+			summa << (*it).first << " ";
+			for (int j = 0; j < vec1.size(); j++)
+			{
+				Vector::iterator iter = vec1.begin();
+				advance(iter, j);
+				vec1 = it->second;
+				summa << "|" << vec1[j] << "|" << " ";
+			}
+			summa << endl;
+
+		}
+		summa << endl;
+		//Вторая матрица 
+		for (MAP::const_iterator it2 = Matrix2.begin(); it2 != Matrix2.end(); ++it2)
+		{
+			summa << (*it2).first << " ";
+			for (int j2 = 0; j2 < vec2.size(); j2++)
+			{
+				Vector::iterator iter2 = vec2.begin();
+				advance(iter2, j2);
+				vec2 = it2->second;
+				summa << "|" << vec2[j2] << "|" << " ";
+			}
+			summa << endl;
+		}
+
+	}
+	summa << endl;
+
+	//Сумма матриц 
+	MAP MATRIXSUMM;
+	Vector vec3;
+
+
+	for (MAP::iterator it = Matrix1.begin(); it != Matrix1.end(); ++it)
+	{
+		vec3.clear();
+		int b = it->first;
+
+		Vector vec1 = it->second;
+		Vector::iterator iter1 = vec1.begin();
+		MAP::iterator  result = Matrix2.find(b);
+		Vector vec2 = result->second;
+		Vector::iterator iter2 = vec2.begin();
+		std::transform(
+			vec1.begin(), vec1.end(),
+			vec2.begin(), std::back_inserter(vec3),
+			std::plus<int>());
+		MATRIXSUMM.insert(make_pair(b, vec3));
+	}
+
+	for (MAP::const_iterator it3 = MATRIXSUMM.begin(); it3 != MATRIXSUMM.end(); ++it3)
+	{
+		summa << (*it3).first << " ";
+		for (int j2 = 0; j2 < vec3.size(); j2++)
+		{
+			Vector::iterator iter3 = vec3.begin();
+			advance(iter3, j2);
+			vec3 = it3->second;
+			summa << "|";
+			if (vec3[j2] < 10) { summa << " "; }
+			summa << vec3[j2] << "|" << " ";
+		}
+		summa << endl;
+
+	}
+	summa.close();
+
+}
+
+
+return 0;
+}
+
+
+
+
+	
+
+
